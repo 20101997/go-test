@@ -3,12 +3,13 @@ package application_2
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
+	"time"
 	"twitch_chat_analysis/cmd/helper"
 )
 
 func Application_2() {
-
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	rdb := helper.ConnectToRedis()
+	conn, err := amqp.Dial("amqp://user:password@localhost:7001/")
 	helper.FailOnError(err, "Failed to connect to RabbitMQ")
 	ch, err := conn.Channel()
 	defer conn.Close()
@@ -40,10 +41,20 @@ func Application_2() {
 
 	go func() {
 		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-			//	setDataToRedis(rdb, d.Body)
+			message, _ := helper.Deserialize(d.Body)
+			log.Printf("Received a message: %s", message)
+			log.Printf("Message sent at: %s", d.Timestamp)
+			message["date"] = time.Now().String()
+			helper.SetDataToRedis(rdb, message)
+
 		}
 	}()
 	log.Printf("Waiting for messages")
+	//helper.GetDataFromRedis(rdb)
+
 	<-forever
+
+	//log.Printf("message received")
+
+	//helper.GetDataFromRedis(rdb)
 }
