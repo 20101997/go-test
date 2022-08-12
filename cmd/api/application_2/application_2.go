@@ -42,19 +42,13 @@ func Application_2() {
 	go func() {
 		for d := range msgs {
 			message, _ := helper.Deserialize(d.Body)
-			log.Printf("Received a message: %s", message)
-			log.Printf("Message sent at: %s", d.Timestamp)
 			message["date"] = time.Now().String()
 			helper.SetDataToRedis(rdb, message)
 
 		}
 	}()
 	log.Printf("Waiting for messages")
-	//helper.GetDataFromRedis(rdb)
 
 	<-forever
 
-	//log.Printf("message received")
-
-	//helper.GetDataFromRedis(rdb)
 }

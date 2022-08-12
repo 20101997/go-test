@@ -21,7 +21,7 @@ func ConnectToRedis() *redis.Client {
 }
 func SetDataToRedis(rdb *redis.Client, message map[string]string) {
 	convertedMessage, _ := json.Marshal(message)
-	err := rdb.Set(ctx, message["sender"]+"To"+message["receiver"]+"Date"+message["date"], convertedMessage, 0).Err()
+	err := rdb.Set(ctx, message["sender"]+message["receiver"]+message["date"], convertedMessage, 0).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -40,20 +40,23 @@ func GetDataFromRedis(rdb *redis.Client, key string) map[string]string {
 
 func GetSortedMessagesListFromRedis(rdb *redis.Client, sender string, receiver string) []map[string]string {
 	var cursor uint64
+	var messagesList []map[string]string
 
-	keys, cursor, err := rdb.Scan(ctx, cursor, sender+"To"+receiver+"*", 0).Result()
+	keys, cursor, err := rdb.Scan(ctx, cursor, sender+receiver+"*", 0).Result()
+	keys2, cursor, err := rdb.Scan(ctx, cursor, receiver+sender+"*", 0).Result()
 	if err != nil {
 		panic(err)
 	}
-	var messagesList []map[string]string
 	for _, key := range keys {
-		fmt.Println(key)
-		fmt.Println(GetDataFromRedis(rdb, key))
 		messagesList = append(messagesList, GetDataFromRedis(rdb, key))
 	}
+	for _, key := range keys2 {
+		messagesList = append(messagesList, GetDataFromRedis(rdb, key))
+	}
+
 	sort.Slice(messagesList, func(i, j int) bool {
-		date1, _ := time.Parse("2006-01-02 15:04:05", messagesList[i]["date"])
-		date2, _ := time.Parse("2006-01-02 15:04:052", messagesList[j]["date"])
+		date1, _ := time.Parse("2006-01-02 15:04:05", messagesList[i]["date"][:19])
+		date2, _ := time.Parse("2006-01-02 15:04:05", messagesList[j]["date"][:19])
 		return date1.After(date2)
 	})
 	return messagesList

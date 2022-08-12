@@ -1,6 +1,6 @@
 package main
 
-import "twitch_chat_analysis/cmd/api/application_1&3"
+import "twitch_chat_analysis/cmd/api/application_1_3"
 
 func main() {
 	//start application 1
