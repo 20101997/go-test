@@ -1,4 +1,4 @@
-package application_1
+package application_1_3
 
 import (
 	"github.com/gin-gonic/gin"
@@ -10,7 +10,7 @@ var (
 	r = gin.Default()
 )
 
-func Application_1() {
+func Application_1_3() {
 
 	//Application 1
 	r.POST("/message", func(c *gin.Context) {
