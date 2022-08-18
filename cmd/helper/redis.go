@@ -3,7 +3,6 @@ package helper
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/go-redis/redis/v8"
 	"sort"
 	"time"
